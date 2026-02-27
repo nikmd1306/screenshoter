@@ -23,7 +23,10 @@ if [ ! -f "$IMAGE_PATH" ] || [ ! -s "$IMAGE_PATH" ]; then
     exit 1
 fi
 
-xclip -selection clipboard -t image/png -i < "$IMAGE_PATH"
+xclip -selection clipboard -t image/png -i < "$IMAGE_PATH" >/dev/null 2>&1 &
+XCLIP_PID=$!
+sleep 0.2
+
 ln -sf "$IMAGE_PATH" "$SCREENSHOTS_DIR/latest.png"
 
 echo "OK:$IMAGE_PATH"
