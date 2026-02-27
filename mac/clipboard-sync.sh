@@ -5,6 +5,9 @@
 
 set -uo pipefail
 
+# Homebrew PATH (LaunchAgent doesn't inherit shell PATH)
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+
 #############################
 # CONFIGURATION - EDIT THIS #
 #############################
