@@ -1,0 +1,4 @@
+*.log
+*.png
+.claude/
+claudecode-remote-server-copypaste-image/
