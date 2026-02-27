@@ -3,10 +3,10 @@
 # Dependencies: brew install pngpaste
 # Usage: ./clipboard-sync.sh
 
-set -uo pipefail
-
 # Homebrew PATH (LaunchAgent doesn't inherit shell PATH)
-export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+export PATH="/opt/homebrew/bin:/usr/local/bin:${PATH:-/usr/bin:/bin}"
+
+set -uo pipefail
 
 #############################
 # CONFIGURATION - EDIT THIS #
