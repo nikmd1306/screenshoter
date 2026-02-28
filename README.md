@@ -70,13 +70,15 @@ Take a screenshot with Xnip (or any tool that copies to clipboard), then Ctrl+V 
 
 ## Configuration
 
-Edit `mac/clipboard-sync.sh` to change:
+Settings are stored in `mac/config.sh` (created by the installer, gitignored). Edit it to change:
 
 | Variable | Default | Description |
 |---|---|---|
 | `SSH_HOST` | `dev` | SSH host (from `~/.ssh/config` or `user@host`) |
 | `REMOTE_RECEIVE` | `~/screenshoter/server/receive.sh` | Path to receive script on server |
 | `POLL_INTERVAL` | `1` | Seconds between clipboard checks |
+
+You can also re-run `bash mac/install.sh` to reconfigure interactively. `git pull` won't touch your config.
 
 ## FAQ
 

@@ -8,13 +8,15 @@ export PATH="/opt/homebrew/bin:/usr/local/bin:${PATH:-/usr/bin:/bin}"
 
 set -uo pipefail
 
-#############################
-# CONFIGURATION - EDIT THIS #
-#############################
-SSH_HOST="dev"                          # SSH host from ~/.ssh/config (or user@host)
-REMOTE_RECEIVE="~/screenshoter/server/receive.sh"  # Path to receive.sh on server
-POLL_INTERVAL=1                         # Seconds between clipboard checks
-#############################
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+CONFIG_FILE="$SCRIPT_DIR/config.sh"
+
+if [ ! -f "$CONFIG_FILE" ]; then
+    echo "ERROR: config.sh not found. Run: bash install.sh"
+    exit 1
+fi
+
+source "$CONFIG_FILE"
 
 TEMP_FILE="/tmp/.clipboard-sync-latest.png"
 LAST_HASH=""
