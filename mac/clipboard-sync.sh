@@ -31,30 +31,21 @@ fi
 log "Clipboard sync started (host: $SSH_HOST, interval: ${POLL_INTERVAL}s)"
 log "Waiting for images in clipboard..."
 
-TICK=0
 while true; do
-    TICK=$((TICK + 1))
-    if [ $((TICK % 10)) -eq 0 ]; then
-        log "DEBUG: heartbeat tick=$TICK"
-    fi
-    PASTE_OUT=$(pngpaste "$TEMP_FILE" 2>&1)
-    PASTE_RC=$?
-    if [ $PASTE_RC -eq 0 ]; then
+    if pngpaste "$TEMP_FILE" 2>/dev/null; then
         CURRENT_HASH=$(md5 -q "$TEMP_FILE")
         if [ "$CURRENT_HASH" != "$LAST_HASH" ]; then
-            log "New image detected (hash: $CURRENT_HASH)"
-            LAST_HASH="$CURRENT_HASH"
+            log "New image detected (hash: ${CURRENT_HASH:0:8}...)"
             RESULT=$(cat "$TEMP_FILE" | ssh "$SSH_HOST" "$REMOTE_RECEIVE" 2>&1)
             if [[ "$RESULT" == OK:* ]]; then
+                LAST_HASH="$CURRENT_HASH"
                 REMOTE_PATH="${RESULT#OK:}"
                 log "Synced: $REMOTE_PATH"
                 osascript -e "display notification \"Screenshot synced\" with title \"Screenshoter\"" 2>/dev/null
             else
-                log "ERROR: ssh failed: $RESULT"
+                log "ERROR: sync failed: $RESULT"
             fi
         fi
-    elif [ $((TICK % 30)) -eq 0 ]; then
-        log "DEBUG: pngpaste rc=$PASTE_RC out=$PASTE_OUT"
     fi
     sleep "$POLL_INTERVAL"
 done
