@@ -20,6 +20,7 @@ source "$CONFIG_FILE"
 
 TEMP_FILE="/tmp/.clipboard-sync-latest.png"
 LAST_CHANGE_COUNT=""
+LAST_IMAGE_HASH=""
 
 log() {
     echo "[$(date '+%H:%M:%S')] $1"
@@ -45,15 +46,22 @@ while true; do
     CURRENT_CHANGE_COUNT=$(get_clipboard_change_count)
     if [ "$CURRENT_CHANGE_COUNT" != "$LAST_CHANGE_COUNT" ]; then
         if pngpaste "$TEMP_FILE" 2>/dev/null; then
-            log "New image detected (clipboard change: $CURRENT_CHANGE_COUNT)"
-            RESULT=$(cat "$TEMP_FILE" | ssh "$SSH_HOST" "$REMOTE_RECEIVE" 2>&1)
-            if [[ "$RESULT" == OK:* ]]; then
-                LAST_CHANGE_COUNT="$CURRENT_CHANGE_COUNT"
-                REMOTE_PATH="${RESULT#OK:}"
-                log "Synced: $REMOTE_PATH"
-                osascript -e "display notification \"Screenshot synced\" with title \"Screenshoter\"" 2>/dev/null
+            CURRENT_IMAGE_HASH=$(md5 -q "$TEMP_FILE")
+            if [ "$CURRENT_IMAGE_HASH" != "$LAST_IMAGE_HASH" ]; then
+                log "New image detected (clipboard change: $CURRENT_CHANGE_COUNT)"
+                RESULT=$(cat "$TEMP_FILE" | ssh "$SSH_HOST" "$REMOTE_RECEIVE" 2>&1)
+                if [[ "$RESULT" == OK:* ]]; then
+                    LAST_IMAGE_HASH="$CURRENT_IMAGE_HASH"
+                    LAST_CHANGE_COUNT="$CURRENT_CHANGE_COUNT"
+                    REMOTE_PATH="${RESULT#OK:}"
+                    log "Synced: $REMOTE_PATH"
+                    osascript -e "display notification \"Screenshot synced\" with title \"Screenshoter\"" 2>/dev/null
+                else
+                    log "ERROR: sync failed: $RESULT"
+                fi
             else
-                log "ERROR: sync failed: $RESULT"
+                LAST_CHANGE_COUNT="$CURRENT_CHANGE_COUNT"
+                log "Skipped duplicate image (clipboard change: $CURRENT_CHANGE_COUNT)"
             fi
         else
             # Clipboard changed but doesn't contain an image — update count to skip it
